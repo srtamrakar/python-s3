@@ -10,7 +10,7 @@ A S3 connector with some basic functionalities.
 
 ## Install with pip
 ```bash
-$ pip install S3-Connector
+$ pip install S3Connector
 ```
 
 ## Usage
