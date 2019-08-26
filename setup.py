@@ -8,7 +8,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md'), encoding='utf-8'
 setup(
 	name='S3Connector',
 	packages=['S3Connector'],
-	version='0.0.4',
+	version='0.1.0',
 	license='MIT',
 	description='Some special functions for some python objects.',
 	long_description=long_description,
@@ -16,14 +16,14 @@ setup(
 	author='Samyak Ratna Tamrakar',
 	author_email='samyak.r.tamrakar@gmail.com',
 	url='https://github.com/srtamrakar/python-s3',
-	download_url = 'https://github.com/srtamrakar/python-s3/archive/v_0.0.4.tar.gz',
-	keywords=['list', 'string', 'datetime', 'directory'],
+	download_url='https://github.com/srtamrakar/python-s3/archive/v_0.1.0.tar.gz',
+	keywords=['aws', 's3', 'csv', 'dataframe', 'pandas'],
 	install_requires=[
 		'boto3>=1.9.134',
 		'botocore>=1.12.134',
 	],
 	classifiers=[
-		'Development Status :: 2 - Pre-Alpha',  # Either"3 - Alpha", "4 - Beta" or "5 - Production/Stable"
+		'Development Status :: 3 - Alpha',  # Either"3 - Alpha", "4 - Beta" or "5 - Production/Stable"
 		'Intended Audience :: Developers',  # Define that your audience are developers
 		'Topic :: Software Development :: Build Tools',
 		'License :: OSI Approved :: MIT License',
