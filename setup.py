@@ -8,7 +8,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md'), encoding='utf-8'
 setup(
 	name='S3Connector',
 	packages=['S3Connector'],
-	version='0.0.3',
+	version='0.0.4',
 	license='MIT',
 	description='Some special functions for some python objects.',
 	long_description=long_description,
@@ -16,7 +16,7 @@ setup(
 	author='Samyak Ratna Tamrakar',
 	author_email='samyak.r.tamrakar@gmail.com',
 	url='https://github.com/srtamrakar/python-s3',
-	download_url = 'https://github.com/srtamrakar/python-s3/archive/v_0.0.3.tar.gz',
+	download_url = 'https://github.com/srtamrakar/python-s3/archive/v_0.0.4.tar.gz',
 	keywords=['list', 'string', 'datetime', 'directory'],
 	install_requires=[
 		'boto3>=1.9.134',
