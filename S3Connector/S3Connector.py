@@ -7,7 +7,7 @@ import botocore
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 
-class S3_Connector(object):
+class S3Connector(object):
 
 	def __init__(self, aws_access_key_id=None, aws_secret_access_key=None, aws_region_name=None):
 		self._create_clients(aws_access_key_id, aws_secret_access_key, aws_region_name)
