@@ -10,6 +10,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 
 class S3Connector(object):
+	# general csv features
+	_csv_sep = '\t'
+	_csv_null_identifier = '#N/A'
 
 	def __init__(self, aws_access_key_id=None, aws_secret_access_key=None, aws_region=None):
 		self._create_clients(aws_access_key_id, aws_secret_access_key, aws_region)
@@ -124,16 +127,12 @@ class S3Connector(object):
 		if object_name is None: return
 
 		try:
-			# general csv features
-			csv_sep = '\t'
-			csv_null_identifier = '#N/A'
-
 			# save dataframe as temp csv
 			csv_io = io.StringIO()
-			dataframe.to_csv(csv_io, sep=csv_sep, encoding='utf-8-sig',
-							 header=True, index=False, na_rep=csv_null_identifier)
+			dataframe.to_csv(csv_io, sep=self._csv_sep, encoding='utf-8-sig',
+							 header=True, index=False, na_rep=self._csv_null_identifier)
 			csv_contents = csv_io.getvalue()
-			csv_contents = re.sub(r'NaT', csv_null_identifier, csv_contents)
+			csv_contents = re.sub(r'NaT', self._csv_null_identifier, csv_contents)
 			csv_io.seek(0)
 			csv_io.write(csv_contents)
 
