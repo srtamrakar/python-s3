@@ -9,10 +9,24 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 class S3(object):
 
-	def __init__(self):
-		self._create_clients()
+	def __init__(self, aws_access_key_id=None, aws_secret_access_key=None, aws_region_name=None):
+		self._create_clients(aws_access_key_id, aws_secret_access_key, aws_region_name)
 
-	def _create_clients(self):
+	def _create_clients(self, aws_access_key_id=None, aws_secret_access_key=None, aws_region_name=None):
+
+		if None not in [aws_access_key_id, aws_secret_access_key, aws_region_name]:
+			self._s3_client = boto3.client(
+				's3',
+				aws_access_key_id=aws_access_key_id,
+				aws_secret_access_key=aws_secret_access_key,
+				region_name=aws_region_name,
+			)
+			self._s3_resource = boto3.resource(
+				's3',
+				aws_access_key_id=aws_access_key_id,
+				aws_secret_access_key=aws_secret_access_key,
+				region_name=aws_region_name,
+			)
 		self._s3_client = boto3.client('s3')
 		self._s3_resource = boto3.resource('s3')
 		return
