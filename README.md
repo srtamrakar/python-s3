@@ -30,6 +30,7 @@ $ pip install S3-Connector
 3. The imported module has several functions. Please refer to respective help for more information.
 
     1. ```s3_connector.upload_file(file_path, bucket_name, object_name)```: upload a file to S3 bucket
+    1. ```s3_connector.upload_dataframe_as_csv(dataframe, bucket_name, object_name)```: upload a dataframe as csv to S3 bucket
     1. ```s3_connector.download_file(bucket_name, object_name, file_path)```: download a file from S3 bucket
     1. ```s3_connector.delete_object(bucket_name, object_name)```: delete an object from S3 bucket
 

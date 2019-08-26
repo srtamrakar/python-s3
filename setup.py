@@ -16,7 +16,7 @@ setup(
 	author='Samyak Ratna Tamrakar',
 	author_email='samyak.r.tamrakar@gmail.com',
 	url='https://github.com/srtamrakar/python-s3',
-	# download_url = 'https://github.com/srtamrakar/python-s3/archive/v_0.0.3.tar.gz',
+	download_url = 'https://github.com/srtamrakar/python-s3/archive/v_0.0.3.tar.gz',
 	keywords=['list', 'string', 'datetime', 'directory'],
 	install_requires=[
 		'boto3>=1.9.134',
