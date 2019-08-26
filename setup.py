@@ -6,9 +6,9 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md'), encoding='utf-8'
 	long_description = f.read()
 
 setup(
-	name='S3-Connector',
-	packages=['S3-Connector'],
-	version='0.0.1',
+	name='S3_Connector',
+	packages=['S3_Connector'],
+	version='0.0.2',
 	license='MIT',
 	description='Some special functions for some python objects.',
 	long_description=long_description,
@@ -16,7 +16,7 @@ setup(
 	author='Samyak Ratna Tamrakar',
 	author_email='samyak.r.tamrakar@gmail.com',
 	url='https://github.com/srtamrakar/python-s3',
-	# download_url = 'https://github.com/srtamrakar/python-s3/archive/v_0.0.1.tar.gz',
+	# download_url = 'https://github.com/srtamrakar/python-s3/archive/v_0.0.2.tar.gz',
 	keywords=['list', 'string', 'datetime', 'directory'],
 	install_requires=[
 		'boto3>=1.9.134',

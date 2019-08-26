@@ -16,7 +16,7 @@ $ pip install S3-Connector
 ## Usage
 1. Import the library.
     ```python
-    from S3-Connector import S3-Connector
+    from S3_Connector import S3_Connector
     ```
 2. Create an instance by defining the path for logfiles, the project name, the level of logging and whether to log to sys.stdout.
     ```python
