@@ -21,7 +21,7 @@ $ pip install S3Connector
 2. Create an instance by defining the path for logfiles, the project name, the level of logging and whether to log to sys.stdout.
     ```python
     # parameters might not be needed, based on the access rights of machine 
-    s3_connector = S3-Connector(
+    s3_connector = S3Connector(
         aws_access_key_id='##########',
         aws_secret_access_key='##########',
         region_name='##########'
