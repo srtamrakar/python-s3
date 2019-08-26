@@ -1,4 +1,4 @@
-# S3-Connector
+# S3Connector
 A S3 connector with some basic functionalities.
 
 ## Requirements
