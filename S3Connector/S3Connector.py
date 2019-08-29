@@ -1,23 +1,26 @@
+import boto3
+import botocore
 import io
 import os
 import re
 import sys
 
-import boto3
-import botocore
-
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 
 class S3Connector(object):
+	"""
+	Python module to connect to S3, create/delete buckets, upload/download/delete objects.
+	"""
+
 	# general csv features
 	_csv_sep = '\t'
 	_csv_null_identifier = '#N/A'
 
 	def __init__(self, aws_access_key_id=None, aws_secret_access_key=None, aws_region=None):
-		self._create_clients(aws_access_key_id, aws_secret_access_key, aws_region)
+		self._create_client(aws_access_key_id, aws_secret_access_key, aws_region)
 
-	def _create_clients(self, aws_access_key_id=None, aws_secret_access_key=None, aws_region=None):
+	def _create_client(self, aws_access_key_id=None, aws_secret_access_key=None, aws_region=None):
 
 		if aws_region is None:
 			aws_region = 'eu-central-1'
@@ -90,7 +93,7 @@ class S3Connector(object):
 
 	def upload_file(self, file_path=None, bucket_name=None, object_name=None):
 		"""
-		Upload a file to an S3 bucket
+		Upload a file to an S3 bucket.
 		:param file_path: File to upload
 		:param bucket_name: Bucket to upload to
 		:param object_name: S3 object name. If not specified then basename of file path
@@ -116,7 +119,7 @@ class S3Connector(object):
 
 	def upload_dataframe_as_csv(self, dataframe=None, bucket_name=None, object_name=None):
 		"""
-		Upload dataframe as csv to an S3 bucket
+		Upload dataframe as csv to an S3 bucket.
 		:param dataframe: pandas dataframe
 		:param bucket_name: Bucket to upload to
 		:param object_name: S3 object name
@@ -150,7 +153,7 @@ class S3Connector(object):
 
 	def download_file(self, bucket_name=None, object_name=None, file_path=None):
 		"""
-		Download a file from S3 bucket
+		Download a file from S3 bucket.
 		:param bucket_name: str
 		:param object_name: str
 		:param file_path: str
@@ -168,7 +171,7 @@ class S3Connector(object):
 
 	def delete_object(self, bucket_name=None, object_name=None):
 		"""
-		Delete an object from an S3 bucket
+		Delete an object from an S3 bucket.
 		:param bucket_name: str
 		:param object_name: str
 		:return: True if the referenced object was deleted, otherwise False
