@@ -10,7 +10,7 @@ setup(
 	packages=['S3Connector'],
 	version='0.1.3',
 	license='MIT',
-	description='Some special functions for some python objects.',
+	description='A S3 connector with some basic functionalities.',
 	long_description=long_description,
 	long_description_content_type='text/markdown',
 	author='Samyak Ratna Tamrakar',
