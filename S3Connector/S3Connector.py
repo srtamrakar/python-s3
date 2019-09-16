@@ -1,9 +1,10 @@
-import boto3
-import botocore
 import io
 import os
 import re
 import sys
+
+import boto3
+import botocore
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
@@ -14,7 +15,7 @@ class S3Connector(object):
 	"""
 
 	# general csv features
-	_csv_sep = '\t'
+	_csv_sep = ','
 	_csv_null_identifier = '#N/A'
 
 	def __init__(self, aws_access_key_id=None, aws_secret_access_key=None, aws_region=None):
@@ -117,25 +118,30 @@ class S3Connector(object):
 			return False
 		return True
 
-	def upload_dataframe_as_csv(self, dataframe=None, bucket_name=None, object_name=None):
+	def upload_dataframe_as_csv(self, dataframe=None, bucket_name=None, object_name=None,
+								csv_sep=None, csv_null_identifier=None):
 		"""
 		Upload dataframe as csv to an S3 bucket.
 		:param dataframe: pandas dataframe
 		:param bucket_name: Bucket to upload to
 		:param object_name: S3 object name
+		:param csv_sep: delimiter
+		:param csv_null_identifier: null identifer
 		:return: True if file was uploaded, else False
 		"""
 		if dataframe is None: return
 		if bucket_name is None: return
 		if object_name is None: return
+		if csv_sep is None: csv_sep = self._csv_sep
+		if csv_null_identifier is None: csv_null_identifier = self._csv_null_identifier
 
 		try:
 			# save dataframe as temp csv
 			csv_io = io.StringIO()
-			dataframe.to_csv(csv_io, sep=self._csv_sep, encoding='utf-8-sig',
-							 header=True, index=False, na_rep=self._csv_null_identifier)
+			dataframe.to_csv(csv_io, sep=csv_sep, encoding='utf-8-sig',
+							 header=True, index=False, na_rep=csv_null_identifier)
 			csv_contents = csv_io.getvalue()
-			csv_contents = re.sub(r'NaT', self._csv_null_identifier, csv_contents)
+			csv_contents = re.sub(r'NaT', csv_null_identifier, csv_contents)
 			csv_io.seek(0)
 			csv_io.write(csv_contents)
 
