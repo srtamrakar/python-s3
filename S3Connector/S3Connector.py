@@ -53,7 +53,7 @@ class S3Connector(object):
             )
         self._s3_client = boto3.client("s3")
         self._s3_resource = boto3.resource("s3")
-        return
+        print("S3 client created")
 
     def _get_list_of_buckets(self):
         resp = self._s3_client.list_buckets()
@@ -81,13 +81,13 @@ class S3Connector(object):
 
         if self._exists_bucket(bucket_name):
             print(
-                "Cannot create the bucket. A bucket with the name '"
-                + bucket_name
-                + "' already exists. Exiting."
+                "Cannot create the bucket. A bucket with the name '{0}' already exists. Exiting.".format(
+                    bucket_name
+                )
             )
 
         try:
-            print("Creating a new bucket named '" + bucket_name + "'...")
+            print(f"Creating a new bucket named '{bucket_name}' ...")
             self._s3_client.create_bucket(
                 Bucket=bucket_name,
                 CreateBucketConfiguration={"LocationConstraint": self._aws_region},
@@ -102,7 +102,7 @@ class S3Connector(object):
         if bucket_name is None:
             return
 
-        print("Deleting the bucket named '" + bucket_name + "'...")
+        print(f"Deleting the bucket named '{bucket_name}' ...")
         self._s3_client.delete_bucket(Bucket=bucket_name)
         print("Bucket deleted")
 
@@ -218,7 +218,6 @@ class S3Connector(object):
 		:param object_name: str
 		:return: True if the referenced object was deleted, otherwise False
 		"""
-        # Delete the object
         try:
             self._s3_client.delete_object(Bucket=bucket_name, Key=object_name)
             print("Object deleted")
