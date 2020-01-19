@@ -23,7 +23,7 @@ $ pip install S3Connector
     s3_connector = S3Connector(
         aws_access_key_id='##########',
         aws_secret_access_key='##########',
-        region_name='##########'
+        aws_region='##########'
     )
     ```
 3. The imported module has several functions. Please refer to respective help for more information.
