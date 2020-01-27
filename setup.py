@@ -5,10 +5,12 @@ from setuptools import setup
 with open(os.path.join(os.path.dirname(__file__), "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
+module_version = "0.1.7"
+
 setup(
     name="S3Connector",
     packages=["S3Connector"],
-    version="0.1.6",
+    version=module_version,
     license="MIT",
     description="A S3 connector with some basic functionalities.",
     long_description=long_description,
@@ -16,7 +18,7 @@ setup(
     author="Samyak Ratna Tamrakar",
     author_email="samyak.r.tamrakar@gmail.com",
     url="https://github.com/srtamrakar/python-s3",
-    download_url="https://github.com/srtamrakar/python-s3/archive/v_0.1.5.tar.gz",
+    download_url=f"https://github.com/srtamrakar/python-s3/archive/v_{module_version}.tar.gz",
     keywords=["aws", "s3", "csv", "dataframe", "pandas"],
     install_requires=["boto3>=1.9.134", "botocore>=1.12.134",],
     classifiers=[

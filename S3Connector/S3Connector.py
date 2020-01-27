@@ -2,30 +2,42 @@ import io
 import os
 import re
 import sys
-
 import boto3
 import botocore
+import logging
+import traceback
+import pandas as pd
+from typing import NoReturn
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 
+logger = logging.getLogger(__name__)
+
+
 class S3Connector(object):
     """
-	Python module to connect to S3, create/delete buckets, upload/download/delete objects.
-	"""
+    Python module to connect to S3, create/delete buckets, upload/download/delete objects.
+    """
 
     # general csv features
     _csv_sep = ","
     _csv_null_identifier = "#N/A"
 
     def __init__(
-        self, aws_access_key_id=None, aws_secret_access_key=None, aws_region=None,
-    ):
+        self,
+        aws_access_key_id: str = None,
+        aws_secret_access_key: str = None,
+        aws_region: str = None,
+    ) -> NoReturn:
         self._create_client(aws_access_key_id, aws_secret_access_key, aws_region)
 
     def _create_client(
-        self, aws_access_key_id=None, aws_secret_access_key=None, aws_region=None
-    ):
+        self,
+        aws_access_key_id: str = None,
+        aws_secret_access_key: str = None,
+        aws_region: str = None,
+    ) -> NoReturn:
 
         if aws_region is None:
             aws_region = "eu-central-1"
@@ -53,109 +65,97 @@ class S3Connector(object):
             )
         self._s3_client = boto3.client("s3")
         self._s3_resource = boto3.resource("s3")
-        print("S3 client created")
+        logger.info("S3 client created")
 
-    def _get_list_of_buckets(self):
+    def _get_list_of_buckets(self) -> list:
         resp = self._s3_client.list_buckets()
         bucket_list = [bucket for bucket in resp["Buckets"]]
         return bucket_list
 
-    def _exists_bucket(self, bucket_name=None):
-        """
-		Determine whether bucket_name exists and the user has permission to access it
-		:param bucket_name: string
-		:return: True if the referenced bucket_name exists, otherwise False
-		"""
+    def _exists_bucket(self, bucket_name: str = None) -> bool:
         if bucket_name is None:
-            return
-        try:
-            resp = self._s3_client.head_bucket(Bucket=bucket_name)
-        except botocore.exceptions.ClientError as e:
-            print(e)
+            logger.warning("Bucket name is not specified")
             return False
-        return True
 
-    def _create_bucket(self, bucket_name=None):
+        try:
+            self._s3_client.head_bucket(Bucket=bucket_name)
+            return True
+        except botocore.exceptions.ClientError as err:
+            logger.error(err)
+            logger.error(traceback.format_exc())
+            return False
+
+    def _create_bucket(self, bucket_name: str = None) -> bool:
         if bucket_name is None:
-            return
+            logger.warning("Bucket name is not specified")
+            return False
 
         if self._exists_bucket(bucket_name):
-            print(
-                "Cannot create the bucket. A bucket with the name '{0}' already exists. Exiting.".format(
-                    bucket_name
-                )
+            logger.warning(
+                f"Cannot create the bucket. A bucket with the name '{bucket_name}' already exists."
             )
 
         try:
-            print(f"Creating a new bucket named '{bucket_name}' ...")
+            logger.info(f"Creating a new bucket named '{bucket_name}' ...")
             self._s3_client.create_bucket(
                 Bucket=bucket_name,
                 CreateBucketConfiguration={"LocationConstraint": self._aws_region},
             )
-            print("Bucket created")
-        except Exception as e:
-            print(e)
-            sys.exit()
-        return
+            logger.info("Bucket created")
+            return True
+        except Exception as err:
+            logger.error(err)
+            logger.error(traceback.format_exc())
+            return False
 
-    def _delete_bucket(self, bucket_name):
+    def _delete_bucket(self, bucket_name: str = None) -> bool:
         if bucket_name is None:
-            return
+            logger.warning("Bucket name is not specified")
+            return False
 
-        print(f"Deleting the bucket named '{bucket_name}' ...")
-        self._s3_client.delete_bucket(Bucket=bucket_name)
-        print("Bucket deleted")
+        try:
+            logger.info(f"Deleting the bucket named '{bucket_name}' ...")
+            self._s3_client.delete_bucket(Bucket=bucket_name)
+            logger.info("Bucket deleted")
+            return True
+        except botocore.exceptions.ClientError as err:
+            logger.error(err)
+            logger.error(traceback.format_exc())
+            return False
 
-    def upload_file(self, file_path=None, bucket_name=None, object_name=None):
-        """
-		Upload a file to an S3 bucket.
-		:param file_path: File to upload
-		:param bucket_name: Bucket to upload to
-		:param object_name: S3 object name. If not specified then basename of file path
-		:return: True if file was uploaded, else False
-		"""
+    def upload_file(self, file_path=None, bucket_name=None, object_name=None) -> bool:
         if bucket_name is None:
-            return
+            logger.warning("Bucket name is not specified")
+            return False
 
         # If S3 object_name was not specified, use basename of file_path
         if object_name is None:
             object_name = os.path.basename(file_path)
 
-        if not self._exists_bucket(bucket_name):
+        if self._exists_bucket(bucket_name) is False:
             self._create_bucket(bucket_name)
 
         # Upload the file
         try:
-            resp = self._s3_client.upload_file(file_path, bucket_name, object_name)
-            print("File uploaded")
-        except botocore.exceptions.ClientError as e:
-            print(e)
+            self._s3_client.upload_file(file_path, bucket_name, object_name)
+            logger.info("File uploaded")
+            return True
+        except botocore.exceptions.ClientError as err:
+            logger.error(err)
+            logger.error(traceback.format_exc())
             return False
-        return True
 
     def upload_dataframe_as_csv(
         self,
-        dataframe=None,
-        bucket_name=None,
-        object_name=None,
-        csv_sep=None,
-        csv_null_identifier=None,
-    ):
-        """
-		Upload dataframe as csv to an S3 bucket.
-		:param dataframe: pandas dataframe
-		:param bucket_name: Bucket to upload to
-		:param object_name: S3 object name
-		:param csv_sep: delimiter
-		:param csv_null_identifier: null identifer
-		:return: True if file was uploaded, else False
-		"""
-        if dataframe is None:
-            return
-        if bucket_name is None:
-            return
-        if object_name is None:
-            return
+        dataframe: pd.DataFrame = None,
+        bucket_name: str = None,
+        object_name: str = None,
+        csv_sep: str = None,
+        csv_null_identifier: str = None,
+    ) -> bool:
+        if None in [dataframe, bucket_name, object_name]:
+            logger.warning("Dataframe / Bucket name / Object name is not specified")
+            return False
         if csv_sep is None:
             csv_sep = self._csv_sep
         if csv_null_identifier is None:
@@ -178,53 +178,46 @@ class S3Connector(object):
             csv_io.write(csv_contents)
 
             # copy temp csv file to S3 object
-            if not self._exists_bucket(bucket_name):
+            if self._exists_bucket(bucket_name) is False:
                 self._create_bucket(bucket_name)
             self._s3_resource.Object(bucket_name, object_name).put(
                 Body=csv_io.getvalue()
             )
             csv_io.close()
 
-            print("File uploaded")
-        except Exception as e:
-            print(e)
+            logger.info("File uploaded")
+            return True
+        except Exception as err:
+            logger.error(err)
+            logger.error(traceback.format_exc())
             return False
-        return True
 
-    def download_file(self, bucket_name=None, object_name=None, file_path=None):
-        """
-		Download a file from S3 bucket.
-		:param bucket_name: str
-		:param object_name: str
-		:param file_path: str
-		:return: True if the file was download, else False
-		"""
-        if bucket_name is None:
-            return
-        if object_name is None:
-            return
+    def download_file(
+        self, bucket_name: str = None, object_name: str = None, file_path: str = None
+    ) -> bool:
+        if None in [bucket_name, object_name]:
+            logger.warning("Bucket name / Object name is not specified")
+            return False
 
         try:
             self._s3_resource.Object(bucket_name, object_name).download_file(file_path)
-        except Exception as e:
-            print(e)
+            return True
+        except Exception as err:
+            logger.error(err)
+            logger.error(traceback.format_exc())
             return False
-        return True
 
-    def delete_object(self, bucket_name=None, object_name=None):
-        """
-		Delete an object from an S3 bucket.
-		:param bucket_name: str
-		:param object_name: str
-		:return: True if the referenced object was deleted, otherwise False
-		"""
+    def delete_object(self, bucket_name: str = None, object_name: str = None) -> bool:
         try:
             self._s3_client.delete_object(Bucket=bucket_name, Key=object_name)
-            print("Object deleted")
-        except botocore.exceptions.ClientError as e:
-            print(e)
+            logger.info("Object deleted")
+            return True
+        except botocore.exceptions.ClientError as err:
+            logger.error(err)
+            logger.error(traceback.format_exc())
             return False
-        return True
 
-    def _get_s3_object_path(self, bucket_name=None, object_name=None):
+    def _get_s3_object_path(
+        self, bucket_name: str = None, object_name: str = None
+    ) -> str:
         return "s3://{0}/{1}".format(bucket_name, object_name)
