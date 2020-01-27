@@ -20,7 +20,7 @@ setup(
     url="https://github.com/srtamrakar/python-s3",
     download_url=f"https://github.com/srtamrakar/python-s3/archive/v_{module_version}.tar.gz",
     keywords=["aws", "s3", "csv", "dataframe", "pandas"],
-    install_requires=["boto3>=1.9.134", "botocore>=1.12.134",],
+    install_requires=["boto3>=1.9.134", "botocore>=1.12.134"],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
