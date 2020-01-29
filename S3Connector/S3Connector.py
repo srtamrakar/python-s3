@@ -67,11 +67,6 @@ class S3Connector(object):
         self._s3_resource = boto3.resource("s3")
         logger.info("S3 client created")
 
-    def _get_list_of_buckets(self) -> list:
-        resp = self._s3_client.list_buckets()
-        bucket_list = [bucket for bucket in resp["Buckets"]]
-        return bucket_list
-
     def _exists_bucket(self, bucket_name: str = None) -> bool:
         if bucket_name is None:
             logger.warning("Bucket name is not specified")
@@ -215,6 +210,24 @@ class S3Connector(object):
             logger.error(err)
             logger.error(traceback.format_exc())
             return False
+
+    def get_list_of_buckets(self) -> list:
+        resp = self._s3_client.list_buckets()
+        bucket_list = [bucket for bucket in resp["Buckets"]]
+        return bucket_list
+
+    def get_list_of_objects(self, bucket_name: str = None) -> Optional[list]:
+        if bucket_name is None:
+            logger.warning("Bucket name is not specified")
+            return None
+
+        resp = self._s3_client.list_objects(Bucket="bucket_name")
+        try:
+            return resp["Contents"]
+        except KeyError as err:
+            logger.error(err)
+            logger.error(traceback.format_exc())
+            return None
 
     def _get_s3_object_path(
         self, bucket_name: str = None, object_name: str = None
