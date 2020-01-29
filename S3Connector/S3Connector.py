@@ -96,12 +96,11 @@ class S3Connector(object):
             )
 
         try:
-            logger.info(f"Creating a new bucket named '{bucket_name}' ...")
             self._s3_client.create_bucket(
                 Bucket=bucket_name,
                 CreateBucketConfiguration={"LocationConstraint": self._aws_region},
             )
-            logger.info("Bucket created")
+            logger.info(f"Bucket created: {bucket_name}")
             return True
         except Exception as err:
             logger.error(err)
@@ -114,9 +113,8 @@ class S3Connector(object):
             return False
 
         try:
-            logger.info(f"Deleting the bucket named '{bucket_name}' ...")
             self._s3_client.delete_bucket(Bucket=bucket_name)
-            logger.info("Bucket deleted")
+            logger.info(f"Bucket deleted: {bucket_name}/{object_name}")
             return True
         except botocore.exceptions.ClientError as err:
             logger.error(err)
@@ -138,7 +136,7 @@ class S3Connector(object):
         # Upload the file
         try:
             self._s3_client.upload_file(file_path, bucket_name, object_name)
-            logger.info("File uploaded")
+            logger.info(f"File uploaded: {bucket_name}/{object_name}")
             return True
         except botocore.exceptions.ClientError as err:
             logger.error(err)
@@ -185,7 +183,7 @@ class S3Connector(object):
             )
             csv_io.close()
 
-            logger.info("File uploaded")
+            logger.info(f"File uploaded: {bucket_name}/{object_name}")
             return True
         except Exception as err:
             logger.error(err)
@@ -201,6 +199,7 @@ class S3Connector(object):
 
         try:
             self._s3_resource.Object(bucket_name, object_name).download_file(file_path)
+            logger.info(f"Object downloaded: {bucket_name}/{object_name}")
             return True
         except Exception as err:
             logger.error(err)
@@ -210,7 +209,7 @@ class S3Connector(object):
     def delete_object(self, bucket_name: str = None, object_name: str = None) -> bool:
         try:
             self._s3_client.delete_object(Bucket=bucket_name, Key=object_name)
-            logger.info("Object deleted")
+            logger.info(f"Object deleted: {bucket_name}/{object_name}")
             return True
         except botocore.exceptions.ClientError as err:
             logger.error(err)
