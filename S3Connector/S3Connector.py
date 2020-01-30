@@ -7,7 +7,7 @@ import botocore
 import logging
 import traceback
 import pandas as pd
-from typing import NoReturn
+from typing import NoReturn, Optional
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
