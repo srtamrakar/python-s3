@@ -10,7 +10,7 @@ $ pip install S3Connector
 ## Usage
 1. Import the library.
     ```python
-    from S3Connector import S3Connector
+    import S3Connector
     ```
 2. Create an instance by defining aws access credentials and region name. These parameters might not be needed, depending on the machine"s access rights. 
     ```python
