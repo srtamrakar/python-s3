@@ -1,16 +1,9 @@
-import io
 import os
-import re
-import sys
 import boto3
 import botocore
 import logging
 import traceback
-import pandas as pd
 from typing import NoReturn, Optional
-
-sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-
 
 logger = logging.getLogger(__name__)
 
@@ -19,10 +12,6 @@ class S3Connector(object):
     """
     Python module to connect to S3, create/delete buckets, upload/download/delete objects.
     """
-
-    # general csv features
-    _csv_sep = ","
-    _csv_null_identifier = "#N/A"
 
     def __init__(
         self,
@@ -39,32 +28,28 @@ class S3Connector(object):
         aws_region: str = None,
     ) -> NoReturn:
 
-        if aws_region is None:
-            aws_region = "eu-central-1"
-
-        self._aws_access_key_id = aws_access_key_id
-        self._aws_secret_access_key = aws_secret_access_key
         self._aws_region = aws_region
 
         if None not in [
-            self._aws_access_key_id,
-            self._aws_secret_access_key,
-            self._aws_region,
+            aws_access_key_id,
+            aws_secret_access_key,
+            aws_region,
         ]:
             self._s3_client = boto3.client(
                 "s3",
-                aws_access_key_id=self._aws_access_key_id,
-                aws_secret_access_key=self._aws_secret_access_key,
-                region_name=self._aws_region,
+                aws_access_key_id=aws_access_key_id,
+                aws_secret_access_key=aws_secret_access_key,
+                region_name=aws_region,
             )
             self._s3_resource = boto3.resource(
                 "s3",
-                aws_access_key_id=self._aws_access_key_id,
-                aws_secret_access_key=self._aws_secret_access_key,
-                region_name=self._aws_region,
+                aws_access_key_id=aws_access_key_id,
+                aws_secret_access_key=aws_secret_access_key,
+                region_name=aws_region,
             )
-        self._s3_client = boto3.client("s3")
-        self._s3_resource = boto3.resource("s3")
+        else:
+            self._s3_client = boto3.client("s3")
+            self._s3_resource = boto3.resource("s3")
         logger.info("S3 client created")
 
     def _exists_bucket(self, bucket_name: str = None) -> bool:
@@ -126,7 +111,8 @@ class S3Connector(object):
             object_name = os.path.basename(file_path)
 
         if self._exists_bucket(bucket_name) is False:
-            self._create_bucket(bucket_name)
+            logger.warning(f"Bucket does not exist: {bucket_name}")
+            return False
 
         # Upload the file
         try:
@@ -134,53 +120,6 @@ class S3Connector(object):
             logger.info(f"File uploaded: {bucket_name}/{object_name}")
             return True
         except botocore.exceptions.ClientError as err:
-            logger.error(err)
-            logger.error(traceback.format_exc())
-            return False
-
-    def upload_dataframe_as_csv(
-        self,
-        dataframe: pd.DataFrame = None,
-        bucket_name: str = None,
-        object_name: str = None,
-        csv_sep: str = None,
-        csv_null_identifier: str = None,
-    ) -> bool:
-        if None in [dataframe, bucket_name, object_name]:
-            logger.warning("Dataframe / Bucket name / Object name is not specified")
-            return False
-        if csv_sep is None:
-            csv_sep = self._csv_sep
-        if csv_null_identifier is None:
-            csv_null_identifier = self._csv_null_identifier
-
-        try:
-            # save dataframe as temp csv
-            csv_io = io.StringIO()
-            dataframe.to_csv(
-                csv_io,
-                sep=csv_sep,
-                encoding="utf-8-sig",
-                header=True,
-                index=False,
-                na_rep=csv_null_identifier,
-            )
-            csv_contents = csv_io.getvalue()
-            csv_contents = re.sub(r"NaT", csv_null_identifier, csv_contents)
-            csv_io.seek(0)
-            csv_io.write(csv_contents)
-
-            # copy temp csv file to S3 object
-            if self._exists_bucket(bucket_name) is False:
-                self._create_bucket(bucket_name)
-            self._s3_resource.Object(bucket_name, object_name).put(
-                Body=csv_io.getvalue()
-            )
-            csv_io.close()
-
-            logger.info(f"File uploaded: {bucket_name}/{object_name}")
-            return True
-        except Exception as err:
             logger.error(err)
             logger.error(traceback.format_exc())
             return False
@@ -216,20 +155,15 @@ class S3Connector(object):
         bucket_list = [bucket for bucket in resp["Buckets"]]
         return bucket_list
 
-    def get_list_of_objects(self, bucket_name: str = None) -> Optional[list]:
+    def get_objects(self, bucket_name: str = None) -> Optional[list]:
         if bucket_name is None:
             logger.warning("Bucket name is not specified")
             return None
 
-        resp = self._s3_client.list_objects(Bucket="bucket_name")
+        resp = self._s3_client.list_objects(Bucket=bucket_name)
         try:
             return resp["Contents"]
         except KeyError as err:
             logger.error(err)
             logger.error(traceback.format_exc())
             return None
-
-    def _get_s3_object_path(
-        self, bucket_name: str = None, object_name: str = None
-    ) -> str:
-        return "s3://{0}/{1}".format(bucket_name, object_name)
