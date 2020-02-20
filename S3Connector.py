@@ -94,7 +94,7 @@ class S3Connector(object):
 
         try:
             self._s3_client.delete_bucket(Bucket=bucket_name)
-            logger.info(f"Bucket deleted: {bucket_name}/{object_name}")
+            logger.info(f"Bucket deleted: {bucket_name}")
             return True
         except botocore.exceptions.ClientError as err:
             logger.error(err)
