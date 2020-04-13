@@ -5,7 +5,7 @@ from setuptools import setup
 with open(os.path.join(os.path.dirname(__file__), "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
-module_version = "0.1.9"
+module_version = "0.2.0"
 
 setup(
     name="S3Connector",
@@ -20,7 +20,7 @@ setup(
     url="https://github.com/srtamrakar/python-s3",
     download_url=f"https://github.com/srtamrakar/python-s3/archive/v_{module_version}.tar.gz",
     keywords=["aws", "s3"],
-    install_requires=["boto3>=1.11.17", "botocore>=1.14.17"],
+    install_requires=["boto3>=1.12.37", "botocore>=1.15.39"],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
