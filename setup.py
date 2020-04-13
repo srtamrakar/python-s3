@@ -12,7 +12,7 @@ setup(
     packages=["S3Connector"],
     version=module_version,
     license="MIT",
-    description="A S3 connector with some basic functionalities.",
+    description="Convenient wrapper for S3 connector with some basic functionality.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="Samyak Ratna Tamrakar",
