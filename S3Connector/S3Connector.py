@@ -16,22 +16,22 @@ class S3Connector(object):
         self,
         aws_access_key_id: str = None,
         aws_secret_access_key: str = None,
-        aws_region_name: str = None,
+        aws_region: str = None,
     ) -> NoReturn:
-        self._create_client(aws_access_key_id, aws_secret_access_key, aws_region_name)
+        self._create_client(aws_access_key_id, aws_secret_access_key, aws_region)
 
     def _create_client(
         self,
         aws_access_key_id: str = None,
         aws_secret_access_key: str = None,
-        aws_region_name: str = None,
+        aws_region: str = None,
     ) -> NoReturn:
 
-        self._aws_region_name = aws_region_name
+        self._aws_region_name = aws_region
 
         if any(
             cred is None
-            for cred in [aws_access_key_id, aws_secret_access_key, aws_region_name]
+            for cred in [aws_access_key_id, aws_secret_access_key, aws_region]
         ):
             self.client = boto3.client("s3")
             self.resource = boto3.resource("s3")
@@ -40,13 +40,13 @@ class S3Connector(object):
                 "s3",
                 aws_access_key_id=aws_access_key_id,
                 aws_secret_access_key=aws_secret_access_key,
-                region_name=aws_region_name,
+                region_name=aws_region,
             )
             self.resource = boto3.resource(
                 "s3",
                 aws_access_key_id=aws_access_key_id,
                 aws_secret_access_key=aws_secret_access_key,
-                region_name=aws_region_name,
+                region_name=aws_region,
             )
 
         logger.info("S3 client created")
@@ -120,12 +120,12 @@ class S3Connector(object):
             logger.error(f"Failed to delete object: {bucket_name}/{object_name}")
             raise Exception
 
-    def get_list_of_buckets(self) -> list:
+    def get_bucket_list(self) -> list:
         resp = self.client.list_buckets()
         bucket_list = [bucket for bucket in resp["Buckets"]]
         return bucket_list
 
-    def get_list_of_objects(self, bucket_name: str) -> Optional[list]:
+    def get_object_list(self, bucket_name: str) -> Optional[list]:
         resp = self.client.list_objects(Bucket=bucket_name)
         try:
             return resp["Contents"]
@@ -133,7 +133,7 @@ class S3Connector(object):
             logger.error(f"Failed to get list of object: {bucket_name}")
             return None
 
-    def get_list_of_all_object_keys(self, bucket_name: str):
+    def get_object_keys_list(self, bucket_name: str):
         return list(
             map(self.get_object_key, self.resource.Bucket(bucket_name).objects.all())
         )

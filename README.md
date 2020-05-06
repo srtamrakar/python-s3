@@ -17,7 +17,7 @@ $ pip install S3Connector
     S3 = S3Connector(
         aws_access_key_id="##########",
         aws_secret_access_key="##########",
-        aws_region_name="##########",
+        aws_region="##########",
     )
     ```
 3. The imported module has several functions. Please refer to respective help for more information.
@@ -27,9 +27,9 @@ $ pip install S3Connector
     1. ```S3.delete_bucket(bucket_name)```: deletes a bucket
     1. ```S3.download_file(bucket_name, object_name, file_path)```: download a file from S3 bucket
     1. ```S3.delete_object(bucket_name, object_name)```: delete an object from S3 bucket
-    1. ```S3.get_list_of_buckets()```: get list of S3 buckets
-    1. ```S3.get_list_of_objects(bucket_name)```: get list of S3 object summaries (upto 1000)
-    1. ```S3.get_list_of_all_object_keys(bucket_name)```: get list of all S3 object keys
+    1. ```S3.get_bucket_list()```: get list of S3 buckets
+    1. ```S3.get_object_list(bucket_name)```: get list of S3 object summaries (upto 1000)
+    1. ```S3.get_object_keys_list(bucket_name)```: get list of all S3 object keys
 
 
 **&copy; 2020, [Samyak Ratna Tamrakar](https://www.linkedin.com/in/srtamrakar/)**.
