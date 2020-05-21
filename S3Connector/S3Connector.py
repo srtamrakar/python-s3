@@ -25,7 +25,7 @@ class S3Connector(object):
         connect_timeout=60,
         read_timeout=60,
         max_pool_connections=50,
-        retires={"max_attempts": 4},
+        retries={"max_attempts": 4},
     )
     aws_default_region = "eu-central-1"
 
