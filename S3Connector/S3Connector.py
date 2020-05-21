@@ -1,8 +1,17 @@
 import os
 import boto3
-import botocore
+from botocore.config import Config
+from botocore.exceptions import ClientError
 import logging
 from typing import NoReturn, Optional
+from .exceptions import (
+    BucketDoesNotExist,
+    CreateBucketFailed,
+    DeleteBucketFailed,
+    UploadFailed,
+    DownloadFailed,
+    DeleteObjectFailed,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -12,130 +21,130 @@ class S3Connector(object):
     Python module to connect to S3, create/delete buckets, upload/download/delete objects.
     """
 
+    default_config = Config(
+        connect_timeout=60,
+        read_timeout=60,
+        max_pool_connections=50,
+        retires={"max_attempts": 4},
+    )
+    aws_default_region = "eu-central-1"
+
     def __init__(
         self,
         aws_access_key_id: str = None,
         aws_secret_access_key: str = None,
         aws_region: str = None,
+        config: Config = None,
     ) -> NoReturn:
-        self._create_client(aws_access_key_id, aws_secret_access_key, aws_region)
+
+        self.config = config if config is not None else S3Connector.default_config
+        self.__client = None
+        self.__resource = None
+        self.aws_region = (
+            aws_region if aws_region is not None else S3Connector.aws_default_region
+        )
+
+        self._create_client(aws_access_key_id, aws_secret_access_key)
 
     def _create_client(
-        self,
-        aws_access_key_id: str = None,
-        aws_secret_access_key: str = None,
-        aws_region: str = None,
+        self, aws_access_key_id: str = None, aws_secret_access_key: str = None,
     ) -> NoReturn:
 
-        self._aws_region_name = aws_region
-
-        if any(
-            cred is None
-            for cred in [aws_access_key_id, aws_secret_access_key, aws_region]
-        ):
-            self.client = boto3.client("s3")
-            self.resource = boto3.resource("s3")
+        if any(cred is None for cred in [aws_access_key_id, aws_secret_access_key]):
+            self.__client = boto3.client("s3", region_name=self.aws_region)
+            self.__resource = boto3.resource("s3", region_name=self.aws_region)
         else:
-            self.client = boto3.client(
+            self.__client = boto3.client(
                 "s3",
                 aws_access_key_id=aws_access_key_id,
                 aws_secret_access_key=aws_secret_access_key,
-                region_name=aws_region,
+                region_name=self.aws_region,
             )
-            self.resource = boto3.resource(
+            self.__resource = boto3.resource(
                 "s3",
                 aws_access_key_id=aws_access_key_id,
                 aws_secret_access_key=aws_secret_access_key,
-                region_name=aws_region,
+                region_name=self.aws_region,
             )
-
         logger.info("S3 client created")
 
-    def exists_bucket(self, bucket_name: str) -> bool:
+    def exists_bucket(self, bucket: str) -> bool:
         try:
-            self.client.head_bucket(Bucket=bucket_name)
+            self.__client.head_bucket(Bucket=bucket)
             return True
-        except botocore.exceptions.ClientError as err:
+        except ClientError:
             return False
 
-    def create_bucket(self, bucket_name: str) -> NoReturn:
-        if self.exists_bucket(bucket_name):
-            logger.warning(
-                "Cannot create the bucket. "
-                + f"A bucket with the name '{bucket_name}' already exists."
-            )
+    def create_bucket(self, bucket: str) -> NoReturn:
+        if self.exists_bucket(bucket):
+            logger.warning(f"A bucket with name '{bucket}' already exists.")
             return
 
         try:
-            self.client.create_bucket(
-                Bucket=bucket_name,
-                CreateBucketConfiguration={"LocationConstraint": self._aws_region_name},
+            self.__client.create_bucket(
+                Bucket=bucket,
+                CreateBucketConfiguration={"LocationConstraint": self.aws_region},
             )
-            logger.info(f"Bucket created: {bucket_name}")
-        except Exception as err:
-            logger.error(f"Failed to create bucket: {bucket_name}")
-            raise Exception
+            logger.info(f"Bucket created: '{bucket}'")
+        except Exception:
+            raise CreateBucketFailed(bucket=bucket)
 
-    def delete_bucket(self, bucket_name: str) -> NoReturn:
+    def delete_bucket(self, bucket: str) -> NoReturn:
         try:
-            self.client.delete_bucket(Bucket=bucket_name)
-            logger.info(f"Bucket deleted: {bucket_name}")
-        except Exception as err:
-            logger.error(f"Failed to delete bucket: {bucket_name}")
-            raise Exception
+            self.__client.delete_bucket(Bucket=bucket)
+            logger.info(f"Bucket deleted: '{bucket}'")
+        except Exception:
+            raise DeleteBucketFailed(bucket=bucket)
 
     def upload_file(
-        self, file_path: str, bucket_name: str, object_name: str = None
+        self, file_path: str, bucket: str, object_key: str = None
     ) -> NoReturn:
-        # If S3 object_name was not specified, use basename of file_path
-        if object_name is None:
-            object_name = os.path.basename(file_path)
+        if object_key is None:
+            object_key = os.path.basename(file_path)
 
-        if self.exists_bucket(bucket_name) is False:
-            logger.warning(f"Bucket does not exist: {bucket_name}")
-            return
+        if self.exists_bucket(bucket) is False:
+            raise BucketDoesNotExist(bucket=bucket)
 
         try:
-            self.client.upload_file(file_path, bucket_name, object_name)
-            logger.info(f"File uploaded: {bucket_name}/{object_name}")
-        except Exception as err:
-            logger.error(f"Failed to upload file: {file_path}")
-            raise Exception
+            self.__client.upload_file(file_path, bucket, object_key)
+            logger.info(f"Object created: '{bucket}/{object_key}'")
+        except Exception:
+            raise UploadFailed(
+                file_path=file_path, bucket=bucket, object_key=object_key
+            )
 
-    def download_file(
-        self, bucket_name: str, object_name: str, file_path: str
-    ) -> NoReturn:
+    def download_file(self, bucket: str, object_key: str, file_path: str) -> NoReturn:
         try:
-            self.resource.Object(bucket_name, object_name).download_file(file_path)
-            logger.info(f"Object downloaded: {file_path}")
-        except Exception as err:
-            logger.error(f"Failed to download object: {bucket_name}/{object_name}")
-            raise Exception
+            self.__resource.Object(bucket, object_key).download_file(file_path)
+            logger.info(f"File downloaded: '{file_path}'")
+        except Exception:
+            raise DownloadFailed(
+                bucket=bucket, object_key=object_key, file_path=file_path
+            )
 
-    def delete_object(self, bucket_name: str, object_name: str) -> NoReturn:
+    def delete_object(self, bucket: str, object_key: str) -> NoReturn:
         try:
-            self.client.delete_object(Bucket=bucket_name, Key=object_name)
-            logger.info(f"Object deleted: {bucket_name}/{object_name}")
-        except Exception as err:
-            logger.error(f"Failed to delete object: {bucket_name}/{object_name}")
-            raise Exception
+            self.__client.delete_object(Bucket=bucket, Key=object_key)
+            logger.info(f"Object deleted: '{bucket}/{object_key}'")
+        except Exception:
+            raise DeleteObjectFailed(bucket=bucket, object_key=object_key)
 
     def get_bucket_list(self) -> list:
-        resp = self.client.list_buckets()
+        resp = self.__client.list_buckets()
         bucket_list = [bucket for bucket in resp["Buckets"]]
         return bucket_list
 
-    def get_object_list(self, bucket_name: str) -> Optional[list]:
-        resp = self.client.list_objects(Bucket=bucket_name)
+    def get_object_list(self, bucket: str) -> Optional[list]:
+        resp = self.__client.list_objects(Bucket=bucket)
         try:
             return resp["Contents"]
-        except KeyError as err:
-            logger.error(f"Failed to get list of object: {bucket_name}")
+        except KeyError:
+            logger.error(f"Failed to get list of object from bucket: '{bucket}'")
             return None
 
-    def get_object_keys_list(self, bucket_name: str):
+    def get_object_key_list(self, bucket: str):
         return list(
-            map(self.get_object_key, self.resource.Bucket(bucket_name).objects.all())
+            map(self.get_object_key, self.__resource.Bucket(bucket).objects.all())
         )
 
     @staticmethod
