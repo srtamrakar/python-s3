@@ -1,26 +1,45 @@
 import os
+import re
+from setuptools import setup, find_packages
 
-from setuptools import setup
+ROOT = os.path.dirname(__file__)
+MODULE_NAME = "S3Connector"
 
-with open(os.path.join(os.path.dirname(__file__), "README.md"), encoding="utf-8") as f:
-    long_description = f.read()
 
-module_version = "0.2.0"
+def get_author() -> str:
+    author_re = re.compile(r"""__author__ = ['"]([A-Za-z .]+)['"]""")
+    init = open(os.path.join(ROOT, MODULE_NAME, "__init__.py")).read()
+    return author_re.search(init).group(1)
+
+
+def get_version() -> str:
+    version_re = re.compile(r"""__version__ = ['"]([0-9.]+)['"]""")
+    init = open(os.path.join(ROOT, MODULE_NAME, "__init__.py")).read()
+    return version_re.search(init).group(1)
+
+
+def get_description() -> str:
+    with open(os.path.join(ROOT, "README.md"), encoding="utf-8") as f:
+        description = f.read()
+    return description
+
+
+REQUIRED_LIBRARIES = ["boto3>=1.12.37", "botocore>=1.15.39"]
+
 
 setup(
-    name="S3Connector",
-    packages=["S3Connector"],
-    version=module_version,
+    name=MODULE_NAME,
+    packages=find_packages(),
+    version=get_version(),
     license="MIT",
     description="Convenient wrapper for S3 connector with some basic functionality.",
-    long_description=long_description,
+    long_description=get_description(),
     long_description_content_type="text/markdown",
-    author="Samyak Ratna Tamrakar",
-    author_email="samyak.r.tamrakar@gmail.com",
+    author=get_author(),
     url="https://github.com/srtamrakar/python-s3",
-    download_url=f"https://github.com/srtamrakar/python-s3/archive/v_{module_version}.tar.gz",
+    download_url=f"https://github.com/srtamrakar/python-s3/archive/v_{get_version()}.tar.gz",
     keywords=["aws", "s3"],
-    install_requires=["boto3>=1.12.37", "botocore>=1.15.39"],
+    install_requires=REQUIRED_LIBRARIES,
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",

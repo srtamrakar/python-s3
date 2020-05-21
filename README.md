@@ -8,28 +8,34 @@ $ pip install S3Connector
 ```
 
 ## Usage
-1. Import the library.
+1.  Import the library.
     ```python
     from S3Connector import S3Connector
     ```
-2. Create an instance by defining aws access credentials and region name. These parameters might not be needed, depending on the machine's access rights. 
+1.  AWS credentials are [fetched by boto3](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html). Desired credentials can be passed while initializing `S3Connector`. In order to configure client connection, pass a [`botocore.config.Config`](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html) object.
     ```python
     S3 = S3Connector(
         aws_access_key_id="##########",
         aws_secret_access_key="##########",
-        aws_region_name="##########",
+        aws_region="##########",
+        config=botocore.config.Config(
+            connect_timeout=60,
+            read_timeout=60,
+        ),
     )
     ```
-3. The imported module has several functions. Please refer to respective help for more information.
+1.  The imported module has several functions.
 
-    1. ```S3.exists_bucket(bucket_name)```: checks if a bucket exists
-    1. ```S3.create_bucket(bucket_name)```: creates a bucket
-    1. ```S3.delete_bucket(bucket_name)```: deletes a bucket
-    1. ```S3.download_file(bucket_name, object_name, file_path)```: download a file from S3 bucket
-    1. ```S3.delete_object(bucket_name, object_name)```: delete an object from S3 bucket
-    1. ```S3.get_list_of_buckets()```: get list of S3 buckets
-    1. ```S3.get_list_of_objects(bucket_name)```: get list of S3 object summaries (upto 1000)
-    1. ```S3.get_list_of_all_object_keys(bucket_name)```: get list of all S3 object keys
+    1. ```S3.exists_bucket(bucket)```: checks if a bucket exists
+    1. ```S3.create_bucket(bucket)```: creates a bucket
+    1. ```S3.delete_bucket(bucket)```: deletes a bucket
+    1. ```S3.upload_file(file_path, bucket, object_key)```: upload a file to S3 bucket
+    1. ```S3.download_file(bucket, object_key, file_path)```: download a file from S3 bucket
+    1. ```S3.delete_object(bucket, object_key)```: delete an object from S3 bucket
+    1. ```S3.get_bucket_list()```: get list of S3 bucket summaries
+    1. ```S3.get_bucket_name_list()```: get list of S3 bucket names
+    1. ```S3.get_object_list(bucket)```: get list of S3 object summaries (upto 1000)
+    1. ```S3.get_object_key_list(bucket)```: get list of all S3 object keys
 
 
 **&copy; 2020, [Samyak Ratna Tamrakar](https://www.linkedin.com/in/srtamrakar/)**.
