@@ -2,6 +2,7 @@ import os
 import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
+from botocore.errorfactory import NoSuchBucket
 import logging
 from typing import NoReturn, Optional
 from .exceptions import (
