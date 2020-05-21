@@ -132,6 +132,13 @@ class S3Connector(object):
         bucket_list = [bucket for bucket in resp["Buckets"]]
         return bucket_list
 
+    def get_bucket_name_list(self) -> list:
+        return list(map(self.get_bucket_name, self.__resource.buckets.all()))
+
+    @staticmethod
+    def get_bucket_name(bucket_summary):
+        return bucket_summary.name
+
     def get_object_list(self, bucket: str) -> Optional[list]:
         resp = self.__client.list_objects(Bucket=bucket)
         try:

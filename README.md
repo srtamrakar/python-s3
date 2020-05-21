@@ -32,7 +32,8 @@ $ pip install S3Connector
     1. ```S3.upload_file(file_path, bucket, object_key)```: upload a file to S3 bucket
     1. ```S3.download_file(bucket, object_key, file_path)```: download a file from S3 bucket
     1. ```S3.delete_object(bucket, object_key)```: delete an object from S3 bucket
-    1. ```S3.get_bucket_list()```: get list of S3 buckets
+    1. ```S3.get_bucket_list()```: get list of S3 bucket summaries
+    1. ```S3.get_bucket_name_list()```: get list of S3 bucket names
     1. ```S3.get_object_list(bucket)```: get list of S3 object summaries (upto 1000)
     1. ```S3.get_object_key_list(bucket)```: get list of all S3 object keys
 
