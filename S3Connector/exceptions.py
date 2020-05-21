@@ -1,4 +1,4 @@
-class BucketDoesNotExist(Exception):
+class BucketDoesNotExistError(Exception):
     def __init__(self, bucket: str):
         self.bucket = bucket
 
@@ -6,7 +6,7 @@ class BucketDoesNotExist(Exception):
         return f"Bucket does not exist: '{self.bucket}'"
 
 
-class CreateBucketFailed(Exception):
+class CreateBucketError(Exception):
     def __init__(self, bucket: str):
         self.bucket = bucket
 
@@ -14,7 +14,7 @@ class CreateBucketFailed(Exception):
         return f"Failed to create bucket '{self.bucket}'"
 
 
-class DeleteBucketFailed(Exception):
+class DeleteBucketError(Exception):
     def __init__(self, bucket: str):
         self.bucket = bucket
 
@@ -22,7 +22,7 @@ class DeleteBucketFailed(Exception):
         return f"Failed to delete bucket '{self.bucket}'"
 
 
-class UploadFailed(Exception):
+class UploadError(Exception):
     def __init__(self, file_path: str, bucket: str, object_key: str):
         self.file_path = file_path
         self.bucket = bucket
@@ -32,7 +32,7 @@ class UploadFailed(Exception):
         return f"Failed to upload file '{self.file_path}' as '{self.bucket}/{self.object_key}'"
 
 
-class DownloadFailed(Exception):
+class DownloadError(Exception):
     def __init__(self, bucket: str, object_key: str, file_path: str):
         self.bucket = bucket
         self.object_key = object_key
@@ -42,7 +42,7 @@ class DownloadFailed(Exception):
         return f"Failed to download object '{self.bucket}/{self.object_key}' to '{self.file_path}'"
 
 
-class DeleteObjectFailed(Exception):
+class DeleteObjectError(Exception):
     def __init__(self, bucket: str, object_key: str):
         self.bucket = bucket
         self.object_key = object_key

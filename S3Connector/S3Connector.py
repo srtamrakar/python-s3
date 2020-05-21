@@ -5,12 +5,12 @@ from botocore.exceptions import ClientError
 import logging
 from typing import NoReturn, Optional
 from .exceptions import (
-    BucketDoesNotExist,
-    CreateBucketFailed,
-    DeleteBucketFailed,
-    UploadFailed,
-    DownloadFailed,
-    DeleteObjectFailed,
+    BucketDoesNotExistError,
+    CreateBucketError,
+    DeleteBucketError,
+    UploadError,
+    DownloadError,
+    DeleteObjectError,
 )
 
 logger = logging.getLogger(__name__)
@@ -87,14 +87,14 @@ class S3Connector(object):
             )
             logger.info(f"Bucket created: '{bucket}'")
         except Exception:
-            raise CreateBucketFailed(bucket=bucket)
+            raise CreateBucketError(bucket=bucket)
 
     def delete_bucket(self, bucket: str) -> NoReturn:
         try:
             self.__client.delete_bucket(Bucket=bucket)
             logger.info(f"Bucket deleted: '{bucket}'")
         except Exception:
-            raise DeleteBucketFailed(bucket=bucket)
+            raise DeleteBucketError(bucket=bucket)
 
     def upload_file(
         self, file_path: str, bucket: str, object_key: str = None
@@ -103,22 +103,20 @@ class S3Connector(object):
             object_key = os.path.basename(file_path)
 
         if self.exists_bucket(bucket) is False:
-            raise BucketDoesNotExist(bucket=bucket)
+            raise BucketDoesNotExistError(bucket=bucket)
 
         try:
             self.__client.upload_file(file_path, bucket, object_key)
             logger.info(f"Object created: '{bucket}/{object_key}'")
         except Exception:
-            raise UploadFailed(
-                file_path=file_path, bucket=bucket, object_key=object_key
-            )
+            raise UploadError(file_path=file_path, bucket=bucket, object_key=object_key)
 
     def download_file(self, bucket: str, object_key: str, file_path: str) -> NoReturn:
         try:
             self.__resource.Object(bucket, object_key).download_file(file_path)
             logger.info(f"File downloaded: '{file_path}'")
         except Exception:
-            raise DownloadFailed(
+            raise DownloadError(
                 bucket=bucket, object_key=object_key, file_path=file_path
             )
 
@@ -127,7 +125,7 @@ class S3Connector(object):
             self.__client.delete_object(Bucket=bucket, Key=object_key)
             logger.info(f"Object deleted: '{bucket}/{object_key}'")
         except Exception:
-            raise DeleteObjectFailed(bucket=bucket, object_key=object_key)
+            raise DeleteObjectError(bucket=bucket, object_key=object_key)
 
     def get_bucket_list(self) -> list:
         resp = self.__client.list_buckets()
