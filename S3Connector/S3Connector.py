@@ -51,20 +51,26 @@ class S3Connector(object):
     ) -> NoReturn:
 
         if any(cred is None for cred in [aws_access_key_id, aws_secret_access_key]):
-            self.__client = boto3.client("s3", region_name=self.aws_region)
-            self.__resource = boto3.resource("s3", region_name=self.aws_region)
+            self.__client = boto3.client(
+                "s3", region_name=self.aws_region, config=self.config
+            )
+            self.__resource = boto3.resource(
+                "s3", region_name=self.aws_region, config=self.config
+            )
         else:
             self.__client = boto3.client(
                 "s3",
                 aws_access_key_id=aws_access_key_id,
                 aws_secret_access_key=aws_secret_access_key,
                 region_name=self.aws_region,
+                config=self.config,
             )
             self.__resource = boto3.resource(
                 "s3",
                 aws_access_key_id=aws_access_key_id,
                 aws_secret_access_key=aws_secret_access_key,
                 region_name=self.aws_region,
+                config=self.config,
             )
         logger.info("S3 client created")
 
